@@ -1,0 +1,1 @@
+export const gradientBgOne = "radial-gradient(farthest-side ellipse at 10% 0, #c3c9fe 20%, #9ea2f5)"
