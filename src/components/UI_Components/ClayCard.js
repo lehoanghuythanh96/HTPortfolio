@@ -13,4 +13,4 @@ export const ClayCard = styled(Card)`
   max-width: 100%;
 `
 
-const HIHI = 23
+const HIHI = 234
