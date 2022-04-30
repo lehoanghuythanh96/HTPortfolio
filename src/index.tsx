@@ -5,33 +5,38 @@ import {App} from './App';
 import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import { MainLandingPage } from './components/landingPage/landingpagelayout';
-import { LandingPageHome } from './components/landingPage/children/landingPageHome';
-import {CreateBlogPost } from './components/blogPost/createPost';
-import { SinglePostView } from './components/blogPost/singlePostView';
-import {AdminPanel} from "./components/administrator/adminLayout";
-import {AdminHomePage} from "./components/administrator/homepanel";
+import {MainLandingPage} from './components/landingPage/landingpagelayout';
+import {LandingPageHome} from './components/landingPage/children/landingPageHome';
 import {allRoutes, childrenRenderer, findRouteIndex} from "./models/allRoutes";
+import {ApolloClient, ApolloProvider, InMemoryCache} from "@apollo/client";
+import {apiUrl} from "./environments/environments";
+
+const client = new ApolloClient({
+    uri: apiUrl,
+    cache: new InMemoryCache()
+});
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+    document.getElementById('root') as HTMLElement
 );
 root.render(
-    <BrowserRouter>
-        <Routes>
-            <Route path="*" element={<App/>}>
-                <Route path="/*" element={<MainLandingPage />}>
-                    <Route index element={<LandingPageHome />} />
-                    {allRoutes.map((single, index) => (
-                        <Route key={index} path={single.path} element={single.element}>
-                            {single.children ? findRouteIndex(single.children) : null}
-                            {single.children ? childrenRenderer(single.children) : null}
-                        </Route>
-                    ))}
+    <ApolloProvider client={client}>
+        <BrowserRouter>
+            <Routes>
+                <Route path="*" element={<App/>}>
+                    <Route path="/*" element={<MainLandingPage/>}>
+                        <Route index element={<LandingPageHome/>}/>
+                        {allRoutes.map((single, index) => (
+                            <Route key={index} path={single.path} element={single.element}>
+                                {single.children ? findRouteIndex(single.children) : null}
+                                {single.children ? childrenRenderer(single.children) : null}
+                            </Route>
+                        ))}
+                    </Route>
                 </Route>
-            </Route>
-        </Routes>
-    </BrowserRouter>
+            </Routes>
+        </BrowserRouter>
+    </ApolloProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
