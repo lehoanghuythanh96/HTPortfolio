@@ -11,6 +11,10 @@ export class AdminHomePage extends React.Component {
         return await apiPostData('blog/media/deleteall/',{})
     }
 
+    async deleteAllBlogPost() {
+        return await apiPostData('blog/post/deleteall/',{})
+    }
+
     render() {
 
         return (
@@ -33,6 +37,11 @@ export class AdminHomePage extends React.Component {
                     <Col xs="auto">
                         <BasicButton onClick={() => this.deleteAlltrashMedia()}>
                             Delete all trash
+                        </BasicButton>
+                    </Col>
+                    <Col xs="auto">
+                        <BasicButton onClick={() => this.deleteAllBlogPost()}>
+                            Delete all blog post
                         </BasicButton>
                     </Col>
                 </Row>

@@ -10,7 +10,11 @@ export class AdminPanel extends React.Component {
             query: "query {\n" +
                 "  allBlogPosts {\n" +
                 "      postTitle,\n" +
-                "      postContent\n" +
+                "      postContent,\n" +
+                "      postAuthor {\n" +
+                "          fullName,\n" +
+                "          email\n" +
+                "      }\n" +
                 "  }\n" +
                 "}"
         })

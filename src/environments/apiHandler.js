@@ -54,6 +54,10 @@ axios.interceptors.response.use(
                 let msg = error.response.data.message
                 toggleSnackbar.next(msg)
             }
+            if (error.response.data && error.response.data.detail) {
+                let msg = error.response.data.detail
+                toggleSnackbar.next(msg)
+            }
             return Promise.reject(error.response);
         } else {
             console.log(error)
