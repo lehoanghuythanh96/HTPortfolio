@@ -4,16 +4,6 @@ import {BasicButton, SuccessButton} from "../UI_Components/Buttons";
 import {Link} from "react-router-dom";
 import {apiPostData} from "../../environments/apiHandler";
 import {MyBreadCrumb} from "../UI_Components/UI_Breadcrumbs";
-import {gql, useQuery} from "@apollo/client";
-
-const GET_POSTS = gql`
-  query GetDogs {
-    dogs {
-      id
-      breed
-    }
-  }
-`;
 
 export const AdminHomePage = () => {
 

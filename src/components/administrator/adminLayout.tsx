@@ -7,12 +7,16 @@ export class AdminPanel extends React.Component {
 
     async requireGraphql() {
         let res = await apiPostData("graphql/",{
-            query: "query {\n" +
-                "  allBlogPosts {\n" +
-                "      postTitle,\n" +
-                "      postContent\n" +
-                "  }\n" +
-                "}"
+            query: 'query {\n' +
+                '  allBlogPosts {\n' +
+                '      postTitle,\n' +
+                '      postContent,\n' +
+                '      postAuthor {\n' +
+                '          fullName,\n' +
+                '          email\n' +
+                '      }\n' +
+                '  }\n' +
+                '}'
         })
         console.log(res)
     }
