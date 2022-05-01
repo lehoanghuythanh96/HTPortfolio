@@ -9,25 +9,41 @@ import {MainLandingPage} from './components/landingPage/landingpagelayout';
 import {LandingPageHome} from './components/landingPage/children/landingPageHome';
 import {allRoutes, childrenRenderer, findRouteIndex} from "./models/allRoutes";
 
+import {
+    ApolloClient,
+    InMemoryCache,
+    ApolloProvider,
+    useQuery,
+    gql
+} from "@apollo/client";
+import {apiUrl} from "./environments/environments";
+
+export const graphQLclient = new ApolloClient({
+    uri: `${apiUrl}/graphql/`,
+    cache: new InMemoryCache()
+});
+
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
 );
 root.render(
-    <BrowserRouter>
-        <Routes>
-            <Route path="*" element={<App/>}>
-                <Route path="/*" element={<MainLandingPage/>}>
-                    <Route index element={<LandingPageHome/>}/>
-                    {allRoutes.map((single, index) => (
-                        <Route key={index} path={single.path} element={single.element}>
-                            {single.children ? findRouteIndex(single.children) : null}
-                            {single.children ? childrenRenderer(single.children) : null}
-                        </Route>
-                    ))}
+    <ApolloProvider client={graphQLclient}>
+        <BrowserRouter>
+            <Routes>
+                <Route path="*" element={<App/>}>
+                    <Route path="/*" element={<MainLandingPage/>}>
+                        <Route index element={<LandingPageHome/>}/>
+                        {allRoutes.map((single, index) => (
+                            <Route key={index} path={single.path} element={single.element}>
+                                {single.children ? findRouteIndex(single.children) : null}
+                                {single.children ? childrenRenderer(single.children) : null}
+                            </Route>
+                        ))}
+                    </Route>
                 </Route>
-            </Route>
-        </Routes>
-    </BrowserRouter>
+            </Routes>
+        </BrowserRouter>
+    </ApolloProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
