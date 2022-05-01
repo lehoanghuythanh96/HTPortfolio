@@ -8,35 +8,26 @@ import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {MainLandingPage} from './components/landingPage/landingpagelayout';
 import {LandingPageHome} from './components/landingPage/children/landingPageHome';
 import {allRoutes, childrenRenderer, findRouteIndex} from "./models/allRoutes";
-import {ApolloClient, ApolloProvider, InMemoryCache} from "@apollo/client";
-import {apiUrl} from "./environments/environments";
-
-const client = new ApolloClient({
-    uri: apiUrl,
-    cache: new InMemoryCache()
-});
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
 );
 root.render(
-    <ApolloProvider client={client}>
-        <BrowserRouter>
-            <Routes>
-                <Route path="*" element={<App/>}>
-                    <Route path="/*" element={<MainLandingPage/>}>
-                        <Route index element={<LandingPageHome/>}/>
-                        {allRoutes.map((single, index) => (
-                            <Route key={index} path={single.path} element={single.element}>
-                                {single.children ? findRouteIndex(single.children) : null}
-                                {single.children ? childrenRenderer(single.children) : null}
-                            </Route>
-                        ))}
-                    </Route>
+    <BrowserRouter>
+        <Routes>
+            <Route path="*" element={<App/>}>
+                <Route path="/*" element={<MainLandingPage/>}>
+                    <Route index element={<LandingPageHome/>}/>
+                    {allRoutes.map((single, index) => (
+                        <Route key={index} path={single.path} element={single.element}>
+                            {single.children ? findRouteIndex(single.children) : null}
+                            {single.children ? childrenRenderer(single.children) : null}
+                        </Route>
+                    ))}
                 </Route>
-            </Routes>
-        </BrowserRouter>
-    </ApolloProvider>
+            </Route>
+        </Routes>
+    </BrowserRouter>
 );
 
 // If you want to start measuring performance in your app, pass a function
