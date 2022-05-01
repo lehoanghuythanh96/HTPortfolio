@@ -1,6 +1,5 @@
 import {dialogContent, toggleDialog} from "../components/UI_Components/UI_Dialog";
 import {UserProfileMenuCard} from "../components/shared/authenticationShared/userProfileMenuCard";
-import {userRoles} from "./userinfo.interface";
 
 interface menuItem {
     id: number
@@ -8,7 +7,8 @@ interface menuItem {
     icon: string
     link: string | null
     action: () => void
-    roles: userRoles[]
+    is_user: boolean
+    is_staff: boolean
 }
 
 export const MenuItems : menuItem[] = [
@@ -18,7 +18,8 @@ export const MenuItems : menuItem[] = [
         icon: `<i class="fa-solid fa-house-heart"></i>`,
         link: '/',
         action: () => {return},
-        roles: []
+        is_user: false,
+        is_staff: false
     },
     {
         id: 2,
@@ -29,7 +30,8 @@ export const MenuItems : menuItem[] = [
             toggleDialog.next(true)
             dialogContent.next(UserProfileMenuCard)
         },
-        roles: [userRoles.subscriber, userRoles.admin]
+        is_user: true,
+        is_staff: false
     },
     {
         id: 3,
@@ -40,6 +42,7 @@ export const MenuItems : menuItem[] = [
             toggleDialog.next(true)
             dialogContent.next(UserProfileMenuCard)
         },
-        roles: []
+        is_user: false,
+        is_staff: false
     }
 ];

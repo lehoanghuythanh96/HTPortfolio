@@ -14,22 +14,52 @@ import styled from "@emotion/styled";
 import {imgShowCaseItem$, postimg, PostImgShowCase} from "./imgShowCase";
 import {MyBreadCrumb} from "../UI_Components/UI_Breadcrumbs";
 import {gradientBgOne} from "../UI_Components/GradientBgOne";
+import {Subject, takeUntil} from "rxjs";
 
-interface postInfo {
+interface PostInfo {
     post_title: string
     post_category: string
     post_content: string
     post_urlName: string
 }
 
+interface MyState {
+    postInfo: PostInfo
+}
+
+const postInfo$ = new Subject()
+
 export class CreateBlogPost extends React.Component {
 
-    postInfo: postInfo = {
-        post_title: "",
-        post_category: "Lifestyle",
-        post_content: "",
-        post_urlName: "",
+    destroy$ = new Subject<boolean>();
+
+    componentDidMount() {
+        postInfo$.pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(
+            res => {
+                let initial = this.state.postInfo
+                let newInfo = Object.assign(initial, res)
+                this.setState({postInfo: newInfo})
+                console.log(this.state.postInfo)
+            }
+        )
     }
+
+    componentWillUnmount() {
+        this.destroy$.next(false);
+        this.destroy$.unsubscribe()
+    }
+
+    state: MyState = {
+        postInfo: {
+            post_title: "",
+            post_content: "",
+            post_category: "Lifestyle",
+            post_urlName: ""
+        }
+    }
+
     post_imgs: postimg[] = []
 
     addFileRef = createRef<any>()
@@ -37,10 +67,10 @@ export class CreateBlogPost extends React.Component {
 
     submitPost = async () => {
 
-        console.log(this.postInfo)
+        console.log(this.state.postInfo)
         console.log(this.post_imgs)
 
-        let postInfo = this.postInfo
+        let postInfo = this.state.postInfo
 
         apiPostData('blog/post/savenewpost/',
             {
@@ -94,7 +124,7 @@ export class CreateBlogPost extends React.Component {
                 <Col>
                     <JoditEditor
                         ref={this.joditeditor}
-                        value={this.postInfo.post_content}
+                        value={this.state.postInfo.post_content}
                         config={{
                             buttons: [
                                 'source', '|',
@@ -124,8 +154,8 @@ export class CreateBlogPost extends React.Component {
                             readonly: false,
                             toolbarAdaptive: false
                         }}
-                        onChange={newContent => {
-                            this.postInfo.post_content = newContent
+                        onBlur={newContent => {
+                            postInfo$.next({post_content: newContent})
                         }}
                     />
                 </Col>
@@ -161,8 +191,7 @@ export class CreateBlogPost extends React.Component {
                                                           let name = e.target.value
                                                           let urlName = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
                                                           urlName = urlName.replace(/[^a-zA-Z0-9]/g, '-')
-                                                          this.postInfo.post_urlName = urlName
-                                                          this.postInfo.post_title = name
+                                                          postInfo$.next({post_urlName: urlName, post_title: name})
                                                       }}
                                             />
                                         </Col>
@@ -171,9 +200,9 @@ export class CreateBlogPost extends React.Component {
                                                 <InputLabel>Category</InputLabel>
                                                 <Select
                                                     label="Category"
-                                                    value={this.postInfo.post_category}
+                                                    value={this.state.postInfo.post_category}
                                                     onChange={(e: any) => {
-                                                        this.postInfo.post_category = e.target.value
+                                                        postInfo$.next({post_category: e.target.value})
                                                     }}
                                                 >
                                                     <MenuItem value="Lifestyle">Lifestyle</MenuItem>
@@ -186,7 +215,7 @@ export class CreateBlogPost extends React.Component {
                                     <Row>
                                         <Col>
                                             <UI_Input label="Post name on url"
-                                                      value={this.postInfo.post_urlName}
+                                                      value={this.state.postInfo.post_urlName}
                                                       disabled
                                             />
                                         </Col>

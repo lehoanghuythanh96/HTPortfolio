@@ -6,7 +6,7 @@ import {dialogContent, toggleDialog} from "../../UI_Components/UI_Dialog";
 import {AuthenticationLoginCard} from "./logincard";
 import {CoreStore} from "../../../store/core.store";
 import {Subject, takeUntil} from "rxjs";
-import {UserInfo, userRoles} from "../../../models/userinfo.interface";
+import {UserInfo} from "../../../models/userinfo.interface";
 import {Link} from "react-router-dom";
 
 interface MyState {
@@ -58,7 +58,7 @@ export class UserProfileMenuCard extends React.Component {
                             </Col>
                         </Row>
                     ) : <div></div>}
-                    {this.state.userInfo?.user_role === userRoles.admin ? (
+                    {this.state.userInfo?.is_superuser ? (
                         <Row>
                             <Col>
                                 <Link
