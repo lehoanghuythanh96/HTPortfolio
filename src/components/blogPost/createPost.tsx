@@ -1,4 +1,4 @@
-import React, {createRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Col, Container, Row} from "react-bootstrap";
 import {ClayCard} from "../UI_Components/ClayCard";
 import {UI_Input} from "../UI_Components/UI_Input";
@@ -10,7 +10,6 @@ import 'react-awesome-slider/dist/styles.css';
 import 'react-awesome-slider/dist/custom-animations/cube-animation.css';
 import {apiPostData, apiPostFile} from "../../environments/apiHandler";
 import {toggleSnackbar} from "../UI_Components/UI_Snackbar";
-import styled from "@emotion/styled";
 import {imgShowCaseItem$, postimg, PostImgShowCase} from "./imgShowCase";
 import {MyBreadCrumb} from "../UI_Components/UI_Breadcrumbs";
 import {gradientBgOne} from "../UI_Components/GradientBgOne";
@@ -23,59 +22,63 @@ interface PostInfo {
     post_urlName: string
 }
 
-interface MyState {
-    postInfo: PostInfo
-}
-
 const postInfo$ = new Subject()
 
-export class CreateBlogPost extends React.Component {
+export const CreateBlogPost = () => {
 
-    destroy$ = new Subject<boolean>();
+    let destroy$ = new Subject<boolean>();
 
-    componentDidMount() {
+    let [postInfo, setPostInfo] = useState<PostInfo>({
+        post_title: "",
+        post_content: "",
+        post_category: "Lifestyle",
+        post_urlName: ""
+    })
+
+    let [post_imgs, set_post_imgs] = useState<postimg[]>([])
+
+    useEffect(() => {
         postInfo$.pipe(
-            takeUntil(this.destroy$)
+            takeUntil(destroy$)
         ).subscribe(
             res => {
-                let initial = this.state.postInfo
-                let newInfo = Object.assign(initial, res)
-                this.setState({postInfo: newInfo})
-                console.log(this.state.postInfo)
+                let val = {...postInfo}
+                Object.assign(val, res)
+                setPostInfo(val)
+                console.log(postInfo)
             }
         )
-    }
 
-    componentWillUnmount() {
-        this.destroy$.next(false);
-        this.destroy$.unsubscribe()
-    }
+        imgShowCaseItem$.pipe(
+            takeUntil(destroy$)
+        ).subscribe(
+            res => {
+                let initial = [...post_imgs]
+                initial.push(res)
+                set_post_imgs(initial)
+            }
+        )
 
-    state: MyState = {
-        postInfo: {
-            post_title: "",
-            post_content: "",
-            post_category: "Lifestyle",
-            post_urlName: ""
+        return () => {
+            destroy$.next(false);
+            destroy$.unsubscribe()
         }
-    }
+    })
 
-    post_imgs: postimg[] = []
 
-    addFileRef = createRef<any>()
-    joditeditor = createRef<any>()
+    let addFileRef = useRef<any>()
+    let joditeditor = useRef<any>()
 
-    submitPost = async () => {
+    let submitPost = async () => {
 
-        console.log(this.state.postInfo)
-        console.log(this.post_imgs)
+        console.log(postInfo)
+        console.log(post_imgs)
 
-        let postInfo = this.state.postInfo
 
         apiPostData('blog/post/savenewpost/',
             {
                 postInfo,
-                post_imgs: this.post_imgs
+                post_imgs
             }
         ).then(
             res => {
@@ -97,7 +100,7 @@ export class CreateBlogPost extends React.Component {
         )
     }
 
-    uploadPostimg = (e: any) => {
+    let uploadPostimg = (e: any) => {
         const data = new FormData()
         data.append('upload', e.target.files[0])
         let url = `blog/post/uploadimg/`;
@@ -108,7 +111,6 @@ export class CreateBlogPost extends React.Component {
                     return
                 }
                 let newItem = {source: `${cdnUrl}/${res.data.media_path}`, media_name: res.data.media_name}
-                this.post_imgs.push(newItem)
                 imgShowCaseItem$.next(newItem)
             }
         ).catch(
@@ -118,13 +120,13 @@ export class CreateBlogPost extends React.Component {
         )
     }
 
-    PostEditor = () => {
+    let PostEditor = () => {
         return (
             <Row className="py-3">
                 <Col>
                     <JoditEditor
-                        ref={this.joditeditor}
-                        value={this.state.postInfo.post_content}
+                        ref={joditeditor}
+                        value={postInfo.post_content}
                         config={{
                             buttons: [
                                 'source', '|',
@@ -164,89 +166,86 @@ export class CreateBlogPost extends React.Component {
     }
 
 
-    render() {
+    return (
+        <Container fluid style={{padding: '100px 0', background: gradientBgOne, minHeight: '100vh'}}>
+            <Container>
+                <Row className="pb-4">
+                    <Col xs="auto">
+                        <ClayCard>
+                            <MyBreadCrumb/>
+                        </ClayCard>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <ClayCard>
+                            <Container>
+                                <Typography variant="h3" className="fw-bold text-center pb-3"
+                                            color={globalSettings.secondaryTextColor}>
+                                    Create post
+                                </Typography>
+                                <Row xs={1} md={2}>
+                                    <Col>
+                                        <UI_Input label="Title"
+                                                  onBlur={(e: any) => {
+                                                      let name = e.target.value
+                                                      let urlName = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                                                      urlName = urlName.replace(/[^a-zA-Z0-9]/g, '-')
+                                                      postInfo$.next({post_urlName: urlName, post_title: name})
+                                                  }}
+                                        />
+                                    </Col>
+                                    <Col>
+                                        <FormControl fullWidth style={{paddingBottom: '1rem'}}>
+                                            <InputLabel>Category</InputLabel>
+                                            <Select
+                                                label="Category"
+                                                value={postInfo.post_category}
+                                                onChange={(e: any) => {
+                                                    postInfo$.next({post_category: e.target.value})
+                                                }}
+                                            >
+                                                <MenuItem value="Lifestyle">Lifestyle</MenuItem>
+                                                <MenuItem value="Information Technology">Information
+                                                    Technology</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col>
+                                        <UI_Input label="Post name on url"
+                                                  value={postInfo.post_urlName}
+                                                  disabled
+                                        />
+                                    </Col>
+                                </Row>
 
-        return (
-            <Container fluid style={{padding: '100px 0', background: gradientBgOne, minHeight: '100vh'}}>
-                <Container>
-                    <Row className="pb-4">
-                        <Col xs="auto">
-                            <ClayCard>
-                                <MyBreadCrumb/>
-                            </ClayCard>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <ClayCard>
-                                <Container>
-                                    <Typography variant="h3" className="fw-bold text-center pb-3"
-                                                color={globalSettings.secondaryTextColor}>
-                                        Create post
-                                    </Typography>
-                                    <Row xs={1} md={2}>
-                                        <Col>
-                                            <UI_Input label="Title"
-                                                      onBlur={(e: any) => {
-                                                          let name = e.target.value
-                                                          let urlName = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                                                          urlName = urlName.replace(/[^a-zA-Z0-9]/g, '-')
-                                                          postInfo$.next({post_urlName: urlName, post_title: name})
-                                                      }}
-                                            />
-                                        </Col>
-                                        <Col>
-                                            <FormControl fullWidth style={{paddingBottom: '1rem'}}>
-                                                <InputLabel>Category</InputLabel>
-                                                <Select
-                                                    label="Category"
-                                                    value={this.state.postInfo.post_category}
-                                                    onChange={(e: any) => {
-                                                        postInfo$.next({post_category: e.target.value})
-                                                    }}
-                                                >
-                                                    <MenuItem value="Lifestyle">Lifestyle</MenuItem>
-                                                    <MenuItem value="Information Technology">Information
-                                                        Technology</MenuItem>
-                                                </Select>
-                                            </FormControl>
-                                        </Col>
-                                    </Row>
-                                    <Row>
-                                        <Col>
-                                            <UI_Input label="Post name on url"
-                                                      value={this.state.postInfo.post_urlName}
-                                                      disabled
-                                            />
-                                        </Col>
-                                    </Row>
+                                {PostEditor()}
+                                <PostImgShowCase/>
 
-                                    {this.PostEditor()}
-                                    <PostImgShowCase/>
+                                <Row className="py-3">
+                                    <Col>
+                                        <input ref={addFileRef} hidden type="file" name="upload"
+                                               onChange={(e) => {
+                                                   uploadPostimg(e)
+                                               }}/>
+                                        <SuccessButton onClick={() => addFileRef.current.click()}>
+                                            Add photos
+                                        </SuccessButton>
+                                    </Col>
+                                </Row>
 
-                                    <Row className="py-3">
-                                        <Col>
-                                            <input ref={this.addFileRef} hidden type="file" name="upload"
-                                                   onChange={(e) => {
-                                                       this.uploadPostimg(e)
-                                                   }}/>
-                                            <SuccessButton onClick={() => this.addFileRef.current.click()}>
-                                                Add photos
-                                            </SuccessButton>
-                                        </Col>
-                                    </Row>
-
-                                    <Row className="py-3">
-                                        <Col className="text-center">
-                                            <BasicButton onClick={this.submitPost}>Submit</BasicButton>
-                                        </Col>
-                                    </Row>
-                                </Container>
-                            </ClayCard>
-                        </Col>
-                    </Row>
-                </Container>
+                                <Row className="py-3">
+                                    <Col className="text-center">
+                                        <BasicButton onClick={submitPost}>Submit</BasicButton>
+                                    </Col>
+                                </Row>
+                            </Container>
+                        </ClayCard>
+                    </Col>
+                </Row>
             </Container>
-        )
-    }
+        </Container>
+    )
 }
