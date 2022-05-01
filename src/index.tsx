@@ -20,7 +20,9 @@ import {apiUrl} from "./environments/environments";
 
 export const graphQLclient = new ApolloClient({
     uri: `${apiUrl}/graphql/`,
-    cache: new InMemoryCache()
+    cache: new InMemoryCache(),
+    // Enable sending cookies over cross-origin requests
+    credentials: 'include'
 });
 
 const root = ReactDOM.createRoot(
