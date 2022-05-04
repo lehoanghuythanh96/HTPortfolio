@@ -11,30 +11,43 @@ import {toggleDialog} from "../../UI_Components/UI_Dialog";
 import {GgLoginBtn} from "./ggLogin";
 import {Divider, Typography} from "@mui/material";
 import {verifyToken} from "../../../environments/apiHandler";
+import {UserInfo} from "../../../models/userinfo.interface";
+import {setUserInfo} from "../../../store/reducers/userinfo.reducer";
+import { useDispatch } from "react-redux";
 
-export async function loginSuccess(res) {
+export const loginSuccess = async (res: any) : Promise<UserInfo | null> => {
     if (res.data && res.data.message) {
         toggleSnackbar.next(res.data.message)
         toggleDialog.next(false)
     }
     if (res.data && res.data.access_token) {
-        await verifyToken(res.data.access_token)
-        return
+        let checker = await verifyToken(res.data.access_token)
+        if (checker.status === 200 && checker.data) {
+            return checker.data
+        } else {
+            return null
+        }
     } else {
         toggleSnackbar.next("No access token received")
+        return null
     }
 }
 
 export const AuthenticationLoginCard = () => {
 
+    let dispatcher = useDispatch()
+
     let loginAction = () => {
 
-        axios.post(`${apiUrl}/auth/userlogin/`, this.loginInfo,
+        axios.post(`${apiUrl}/auth/userlogin/`, loginInfo,
             {
                 withCredentials: true // allow server to set httponly cookie
             })
             .then(async res => {
-                await loginSuccess(res)
+                let success = await loginSuccess(res)
+                if (success) {
+                    dispatcher(setUserInfo(success))
+                }
             }).catch((error) => {
         })
 

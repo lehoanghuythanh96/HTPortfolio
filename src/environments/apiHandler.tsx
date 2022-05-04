@@ -98,8 +98,6 @@ export const refreshToken = async () => {
         (error: any) => {
             if (error.response) {
                 console.log(error.response)
-                let msg = "Your log in session is expired, please log in again"
-                toggleSnackbar.next(msg)
                 return error.response
             } else {
                 console.log(error)
