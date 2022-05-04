@@ -1,10 +1,9 @@
 import {apiUrl, fileUploadApi} from "./environments";
 import {toggleSnackbar} from "../components/UI_Components/UI_Snackbar";
-import {CoreStore} from "../store/core.store";
 
 const axios = require("axios");
 
-export const apiPostData = async (urlsuffix, data) => {
+export const apiPostData = async (urlsuffix: string, data: any) => {
 
     return await axios.post(`${apiUrl}/${urlsuffix}`, data, {
         timeout: 5000,
@@ -13,7 +12,7 @@ export const apiPostData = async (urlsuffix, data) => {
 
 }
 
-export const apiPostFile = async (urlsuffix, data) => {
+export const apiPostFile = async (urlsuffix: string, data: any) => {
 
     return await axios.post(`${fileUploadApi}/${urlsuffix}`, data, {
         timeout: 10000,
@@ -23,14 +22,14 @@ export const apiPostFile = async (urlsuffix, data) => {
 }
 
 axios.interceptors.response.use(
-    (res) => {
+    (res: any) => {
         if (res.data) {
             if (res.data.message) {
                 toggleSnackbar.next(res.data.message)
             }
         }
         return res
-    }, async (error) => {
+    }, async (error: any) => {
         if (error.config && error.response) {
             if (error.response.status === 401) {
                 let refresher = await refreshToken()
@@ -65,21 +64,14 @@ axios.interceptors.response.use(
         }
     });
 
-export const verifyToken = async (newToken) => {
+export const verifyToken = async (newToken: string) => {
     const checker = axios.create({
         baseURL: apiUrl,
         timeout: 5000,
         withCredentials: true
     })
     let resCheck = await checker.post(`auth/token/verify/`,{token: newToken})
-        .then(res => res).catch(error => error.response)
-    if(resCheck.status === 200) {
-        CoreStore.userInfo$.next(resCheck.data)
-    }
-    if(resCheck.status === 401) {
-        console.log(resCheck.data)
-        CoreStore.userInfo$.next(null)
-    }
+        .then((res: any) => res).catch((error: any) => error.response)
     return resCheck
 }
 
@@ -94,7 +86,7 @@ export const refreshToken = async () => {
     return await getRefresher.post(`auth/token/refresh/`, {}, {
         withCredentials: true
     }).then(
-        (res) => {
+        (res: any) => {
             if(res.data && res.data.access_token) {
                 let newToken = res.data.access_token
                 let newBearer = `Bearer ${newToken}`
@@ -103,7 +95,7 @@ export const refreshToken = async () => {
             return res
         }
     ).catch(
-        (error) => {
+        (error: any) => {
             if (error.response) {
                 console.log(error.response)
                 let msg = "Your log in session is expired, please log in again"

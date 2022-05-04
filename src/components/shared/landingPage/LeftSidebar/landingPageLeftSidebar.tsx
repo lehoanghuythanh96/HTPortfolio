@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {BottomNavigationAction, Box, Divider, Drawer, List, ListItem, ListItemText} from "@mui/material";
 import {BehaviorSubject, skipWhile, Subject, takeUntil} from "rxjs";
 import {MenuItems} from "../../../../models/menuItems";
@@ -7,6 +7,8 @@ import {UserInfo} from "../../../../models/userinfo.interface";
 import {userInfo} from "os";
 import {CoreStore} from "../../../../store/core.store";
 import {Link} from "react-router-dom";
+import { useSelector } from "react-redux";
+import { AppState } from "../../../../store/models/corestore.interface";
 
 export const ToggleLandingPageLefSidebar = new BehaviorSubject(false)
 
@@ -15,18 +17,24 @@ interface MyState {
     userInfo: UserInfo | null
 }
 
-export class LandingPageLefSidebar extends React.Component <any, MyState> {
+export const LandingPageLefSidebar = () => {
 
-    state: MyState = {
+    let [isOpen, setIsOpen] = useState<boolean>(false)
+
+    let userInfo$ = useSelector((state: AppState) => state.userInfo.data)
+
+    let state: MyState = {
         isOpen: false,
         userInfo: null
     }
 
-    constructor(props: any) {
-        super(props);
-    }
+    useEffect(
+        () => {
+            console.log(userInfo$)
+        }, [userInfo$]
+    )
 
-    list = () => {
+    let list = () => {
         return (
             <Box
                 sx={{width: 250}}
@@ -74,43 +82,43 @@ export class LandingPageLefSidebar extends React.Component <any, MyState> {
         )
     }
 
-    destroy$ = new Subject()
+    let destroy$ = new Subject()
 
-    componentDidMount() {
-        ToggleLandingPageLefSidebar.pipe(
-            takeUntil(this.destroy$)
-        ).subscribe(
-            val => {
-                this.setState({isOpen: val})
+    useEffect(
+        () => {
+            ToggleLandingPageLefSidebar.pipe(
+                takeUntil(destroy$)
+            ).subscribe(
+                val => {
+                    setIsOpen(val)
+                }
+            )
+
+            // CoreStore.userInfo$.pipe(
+            //     takeUntil(this.destroy$),
+            //     skipWhile(x => !x)
+            // ).subscribe(
+            //     res => {
+            //         this.setState({userInfo: res})
+            //     }
+            // )
+
+            return () => {
+                destroy$.next(true)
+                destroy$.unsubscribe()
             }
-        )
+        }
+    )
 
-        CoreStore.userInfo$.pipe(
-            takeUntil(this.destroy$),
-            skipWhile(x => !x)
-        ).subscribe(
-            res => {
-                this.setState({userInfo: res})
-            }
-        )
-    }
-
-    componentWillUnmount() {
-        this.destroy$.next(true)
-        this.destroy$.unsubscribe()
-    }
-
-    render() {
-        return (
-            <div>
-                <Drawer
-                    anchor={'left'}
-                    open={this.state.isOpen}
-                    onClick={() => ToggleLandingPageLefSidebar.next(false)}
-                >
-                    {this.list()}
-                </Drawer>
-            </div>
-        )
-    }
+    return (
+        <div>
+            <Drawer
+                anchor={'left'}
+                open={isOpen}
+                onClick={() => ToggleLandingPageLefSidebar.next(false)}
+            >
+                {list()}
+            </Drawer>
+        </div>
+    )
 }

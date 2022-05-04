@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import logo from './logo.svg';
 import './App.css';
 import {createTheme, ThemeProvider} from "@mui/material";
@@ -7,6 +7,8 @@ import {globalSettings} from "./environments/environments";
 import {Outlet} from "react-router-dom";
 import {refreshToken, verifyToken} from "./environments/apiHandler";
 import {Subject} from "rxjs";
+import { useDispatch } from 'react-redux';
+import {setUserInfo} from "./store/reducers/userinfo.reducer";
 
 const theme = createTheme({
     palette: {
@@ -31,35 +33,36 @@ const theme = createTheme({
     },
 });
 
-export class App extends React.Component<any, any> {
+export const App = () => {
 
-    destroy$ = new Subject()
+    let dispatcher = useDispatch()
 
-    constructor(props: any) {
-        super(props);
-
-        refreshToken().then(
-            res => {
-                if (res.status === 200) {
-                    return verifyToken(res.data.access_token)
+    useEffect(
+        () => {
+            refreshToken().then(
+                async res => {
+                    if (res.status === 200) {
+                        let checker = await verifyToken(res.data.access_token)
+                        if (checker.status === 200 && checker.data) {
+                            dispatcher(setUserInfo(checker.data))
+                        }
+                    }
                 }
-            }
-        )
-    }
+            )
+        }
+    )
 
-    render() {
-        return (
-            <ThemeProvider theme={theme}>
-                <HelmetProvider>
-                    <Helmet>
-                        <meta name="viewport"
-                              content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-                    </Helmet>
-                    <div className="App" style={{fontFamily: globalSettings.fontPrimary}}>
-                        <Outlet/>
-                    </div>
-                </HelmetProvider>
-            </ThemeProvider>
-        )
-    }
+    return (
+        <ThemeProvider theme={theme}>
+            <HelmetProvider>
+                <Helmet>
+                    <meta name="viewport"
+                          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+                </Helmet>
+                <div className="App" style={{fontFamily: globalSettings.fontPrimary}}>
+                    <Outlet/>
+                </div>
+            </HelmetProvider>
+        </ThemeProvider>
+    )
 }
