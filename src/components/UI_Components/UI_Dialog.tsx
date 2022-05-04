@@ -2,7 +2,6 @@ import * as React from 'react';
 import Dialog from '@mui/material/Dialog';
 import styled from "@emotion/styled";
 import {BehaviorSubject, skipWhile, Subject, takeUntil} from "rxjs";
-import {FunctionComponent} from "react";
 
 const MyDialog = styled(Dialog)(({theme}) => ({
     '& .MuiDialog-paper': {
@@ -18,7 +17,7 @@ class DefaultContent extends React.Component {
     }
 }
 
-export let dialogContent = new BehaviorSubject<React.ComponentClass | null>(null)
+export let dialogContent = new BehaviorSubject<(React.FunctionComponent) | null>(null)
 export let toggleDialog = new BehaviorSubject<boolean>(false)
 
 interface myState {

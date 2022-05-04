@@ -25,62 +25,56 @@ export async function loginSuccess(res) {
     }
 }
 
-export class AuthenticationLoginCard extends React.Component {
+export const AuthenticationLoginCard = () => {
 
-    constructor(props) {
-        super(props);
+    let loginAction = () => {
 
-        this.loginAction = () => {
-
-            axios.post(`${apiUrl}/auth/userlogin/`, this.loginInfo,
-                {
-                    withCredentials: true // allow server to set httponly cookie
-                })
-                .then(async res => {
-                    await loginSuccess(res)
-                }).catch((error) => {})
-
-        }
+        axios.post(`${apiUrl}/auth/userlogin/`, this.loginInfo,
+            {
+                withCredentials: true // allow server to set httponly cookie
+            })
+            .then(async res => {
+                await loginSuccess(res)
+            }).catch((error) => {
+        })
 
     }
 
-    loginInfo = {
+    let loginInfo = {
         email: "",
         password: ""
     }
 
-    render() {
-        const LoginCard = styled(ClayCard)`
-          max-width: 400px;
-        `
+    const LoginCard = styled(ClayCard)`
+      max-width: 400px;
+    `
 
-        return (
-            <LoginCard>
-                <Typography variant="h3" className="text-center pb-3 fw-bold" color={globalSettings.secondaryTextColor}>Sign
-                    In</Typography>
-                <UI_Input label={"Email"} onBlur={(e) => {
-                    this.loginInfo.email = e.target.value
-                }}/>
-                <UI_Input label={"Password"} onBlur={(e) => {
-                    this.loginInfo.password = e.target.value
-                }}/>
-                <Row>
-                    <Col className="text-end">
-                        <BasicButton onClick={() => this.loginAction()}><i
-                            className="fa-solid fa-check"/> OK</BasicButton>
-                    </Col>
-                </Row>
-                <Row className="py-3">
-                    <Col>
-                        <Divider></Divider>
-                    </Col>
-                </Row>
-                <Row xs="auto" className="justify-content-center">
-                    <Col>
-                        <GgLoginBtn></GgLoginBtn>
-                    </Col>
-                </Row>
-            </LoginCard>
-        )
-    }
+    return (
+        <LoginCard>
+            <Typography variant="h3" className="text-center pb-3 fw-bold" color={globalSettings.secondaryTextColor}>Sign
+                In</Typography>
+            <UI_Input label={"Email"} onBlur={(e) => {
+                loginInfo.email = e.target.value
+            }}/>
+            <UI_Input label={"Password"} onBlur={(e) => {
+                loginInfo.password = e.target.value
+            }}/>
+            <Row>
+                <Col className="text-end">
+                    <BasicButton onClick={() => loginAction()}><i
+                        className="fa-solid fa-check"/> OK</BasicButton>
+                </Col>
+            </Row>
+            <Row className="py-3">
+                <Col>
+                    <Divider></Divider>
+                </Col>
+            </Row>
+            <Row xs="auto" className="justify-content-center">
+                <Col>
+                    <GgLoginBtn></GgLoginBtn>
+                </Col>
+            </Row>
+        </LoginCard>
+    )
 }

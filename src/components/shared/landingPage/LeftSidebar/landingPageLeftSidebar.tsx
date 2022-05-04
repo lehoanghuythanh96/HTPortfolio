@@ -1,11 +1,8 @@
 import React, {useEffect, useState} from "react";
-import {BottomNavigationAction, Box, Divider, Drawer, List, ListItem, ListItemText} from "@mui/material";
-import {BehaviorSubject, skipWhile, Subject, takeUntil} from "rxjs";
+import {Box, Divider, Drawer, List, ListItem, ListItemText} from "@mui/material";
+import {BehaviorSubject, Subject, takeUntil} from "rxjs";
 import {MenuItems} from "../../../../models/menuItems";
-import HTMLReactParser from "html-react-parser";
 import {UserInfo} from "../../../../models/userinfo.interface";
-import {userInfo} from "os";
-import {CoreStore} from "../../../../store/core.store";
 import {Link} from "react-router-dom";
 import { useSelector } from "react-redux";
 import { AppState } from "../../../../store/models/corestore.interface";
@@ -17,20 +14,14 @@ interface MyState {
     userInfo: UserInfo | null
 }
 
-export const LandingPageLefSidebar = () => {
+export const LandingPageLeftSidebar = () => {
 
     let [isOpen, setIsOpen] = useState<boolean>(false)
 
     let userInfo$ = useSelector((state: AppState) => state.userInfo.data)
 
-    let state: MyState = {
-        isOpen: false,
-        userInfo: null
-    }
-
     useEffect(
         () => {
-            console.log(userInfo$)
         }, [userInfo$]
     )
 
@@ -93,15 +84,6 @@ export const LandingPageLefSidebar = () => {
                     setIsOpen(val)
                 }
             )
-
-            // CoreStore.userInfo$.pipe(
-            //     takeUntil(this.destroy$),
-            //     skipWhile(x => !x)
-            // ).subscribe(
-            //     res => {
-            //         this.setState({userInfo: res})
-            //     }
-            // )
 
             return () => {
                 destroy$.next(true)

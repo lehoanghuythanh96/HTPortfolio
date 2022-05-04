@@ -1,7 +1,7 @@
 import React from "react";
 
 import {UI_Snackbar} from "../UI_Components/UI_Snackbar";
-import {LandingPageLefSidebar} from "../shared/landingPage/LeftSidebar/landingPageLeftSidebar";
+import {LandingPageLeftSidebar} from "../shared/landingPage/LeftSidebar/landingPageLeftSidebar";
 import {LandingPageHeader} from "../shared/landingPage/Header/landingPageHeader";
 import {Outlet} from "react-router-dom";
 import {Container} from 'react-bootstrap';
@@ -11,7 +11,7 @@ export const MainLandingPage = () => {
 
     return (
         <main>
-            <LandingPageLefSidebar/>
+            <LandingPageLeftSidebar/>
             <LandingPageHeader/>
             <UI_Snackbar/>
             <UI_Dialog/>
