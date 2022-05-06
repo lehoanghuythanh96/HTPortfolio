@@ -10,10 +10,6 @@ import {Link} from "react-router-dom";
 import {AppState} from "../../../store/models/corestore.interface";
 import { useSelector } from "react-redux";
 
-interface MyState {
-    userInfo: UserInfo | null
-}
-
 export const UserProfileMenuCard = () => {
 
     let userInfo$ = useSelector((state: AppState) => state.userInfo.data)

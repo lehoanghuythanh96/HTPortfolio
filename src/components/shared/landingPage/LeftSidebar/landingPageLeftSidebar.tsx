@@ -2,17 +2,11 @@ import React, {useEffect, useState} from "react";
 import {Box, Divider, Drawer, List, ListItem, ListItemText} from "@mui/material";
 import {BehaviorSubject, Subject, takeUntil} from "rxjs";
 import {MenuItems} from "../../../../models/menuItems";
-import {UserInfo} from "../../../../models/userinfo.interface";
 import {Link} from "react-router-dom";
 import { useSelector } from "react-redux";
 import { AppState } from "../../../../store/models/corestore.interface";
 
 export const ToggleLandingPageLefSidebar = new BehaviorSubject(false)
-
-interface MyState {
-    isOpen: boolean
-    userInfo: UserInfo | null
-}
 
 export const LandingPageLeftSidebar = () => {
 

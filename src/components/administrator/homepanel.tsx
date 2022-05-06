@@ -4,6 +4,7 @@ import {BasicButton, SuccessButton} from "../UI_Components/Buttons";
 import {Link} from "react-router-dom";
 import {apiPostData} from "../../environments/apiHandler";
 import {MyBreadCrumb} from "../UI_Components/UI_Breadcrumbs";
+import {AdminAllPostTable} from "./allPostTable";
 
 export const AdminHomePage = () => {
 
@@ -41,6 +42,11 @@ export const AdminHomePage = () => {
                     <BasicButton onClick={() => deleteAllBlogPost()}>
                         Delete all blog post
                     </BasicButton>
+                </Col>
+            </Row>
+            <Row className="py-4">
+                <Col>
+                    <AdminAllPostTable/>
                 </Col>
             </Row>
         </Container>

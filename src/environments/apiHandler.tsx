@@ -48,6 +48,10 @@ axios.interceptors.response.use(
                     return Promise.reject(refresher);
                 }
             }
+            if (error.response.status === 404) {
+                let msg = "Url not found"
+                toggleSnackbar.next(msg)
+            }
             console.log(error.response)
             if (error.response.data && error.response.data.message) {
                 let msg = error.response.data.message
