@@ -181,16 +181,18 @@ interface TableWithSelectionProps {
     rows: any[],
     rowMainKey: string,
     deleteRowApiUrlSuffix?: string
+    afterDeleteRowFn?: () => void
 }
 
 export const TableWithSelection = (props: TableWithSelectionProps) => {
 
-    let {headCells, rows, rowMainKey, deleteRowApiUrlSuffix} = props
+    let {headCells, rows, rowMainKey, deleteRowApiUrlSuffix, afterDeleteRowFn} = props
 
     let deleteFn = async () => {
         if(deleteRowApiUrlSuffix) {
-            console.log(selected)
-            return await apiPostData(deleteRowApiUrlSuffix,selected)
+            await apiPostData(deleteRowApiUrlSuffix,selected)
+            if (afterDeleteRowFn) afterDeleteRowFn()
+            return
         }
     }
 

@@ -39,14 +39,16 @@ export const AdminAllPostTable = () => {
 
     let [tableData, setTableData] = useState<any[]>([])
 
+    let afterDeleteRowFn = () => {
+        adminQuery.refetch()
+    }
+
     useEffect(
         () => {
-            if (!adminQuery.data?.adminPanel?.allBlogPosts) {
+            let data : any[] = adminQuery.data?.adminPanel?.allBlogPosts
+            if (!data) {
                 return
             }
-
-            let data : any[] = [...adminQuery.data?.adminPanel?.allBlogPosts]
-            console.log(data)
 
             if (data) {
                 data = data.map((item) => {
@@ -75,7 +77,8 @@ export const AdminAllPostTable = () => {
                         headCells={headCells}
                         rows = {tableData}
                         rowMainKey={'id'}
-                        deleteRowApiUrlSuffix={"fdas"}
+                        deleteRowApiUrlSuffix={"blog/post/deletebyids/"}
+                        afterDeleteRowFn={afterDeleteRowFn}
                     />
                 </Col>
             </Row>
