@@ -17,12 +17,6 @@ export const PostImgShowCase = (props: {
 
     let {postImgs} = props
 
-    useEffect(
-        () => {
-
-        }, [postImgs]
-    )
-
     if (postImgs.length > 0) {
         return (
             <Row className="justify-content-center py-4">

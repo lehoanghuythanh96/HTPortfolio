@@ -1,7 +1,7 @@
 import {AdminPanel} from "../components/administrator/adminLayout";
 import React, {ReactNode} from "react";
 import {AdminHomePage} from "../components/administrator/homepanel";
-import {CreateBlogPost} from "../components/blogPost/createPost";
+import {CreateBlogPost} from "../components/administrator/createPost/createPost";
 import {SinglePostView} from "../components/blogPost/singlePostView";
 import {Route} from "react-router-dom";
 
