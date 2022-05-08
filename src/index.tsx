@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import 'swiper/css/bundle';
+import "swiper/css/bundle";
 import 'react-medium-image-zoom/dist/styles.css'
 import {App} from './App';
 import reportWebVitals from './reportWebVitals';
