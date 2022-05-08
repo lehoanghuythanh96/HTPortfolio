@@ -1,8 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {Subject, takeUntil} from "rxjs";
 import {Col, Row} from "react-bootstrap";
-import {myAutoPlay} from "./withAutoplay.d";
-import AwesomeSlider from "react-awesome-slider";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Scrollbar, A11y } from 'swiper';
+import {Box} from "@mui/material";
+import Zoom from 'react-medium-image-zoom'
 
 export const imgShowCaseItem$ = new Subject<postimg>()
 
@@ -16,6 +18,7 @@ export const PostImgShowCase = () => {
     const destroy$ = new Subject<boolean>()
 
     let [post_imgs, set_post_imgs] = useState<postimg[]>([])
+    let [currViewImg, setCurrViewImg] = useState<string | null>(null)
 
     useEffect(() => {
         imgShowCaseItem$.pipe(
@@ -24,7 +27,6 @@ export const PostImgShowCase = () => {
             res => {
                 let currentImgs = [...post_imgs]
                 currentImgs.push(res)
-                console.log(currentImgs)
                 set_post_imgs(currentImgs)
             }
         )
@@ -34,21 +36,51 @@ export const PostImgShowCase = () => {
         }
     })
 
-    const AutoplaySlider = myAutoPlay(AwesomeSlider);
-
     if (post_imgs.length > 0) {
         return (
             <Row className="justify-content-center py-4">
-                <Col style={{maxWidth: "500px"}}>
-                    <AutoplaySlider
-                        mobileTouch={true}
-                        play={true}
-                        cancelOnInteraction={false} // should stop playing on user interaction
-                        interval={2000}
-                        animation="cubeAnimation"
-                        media={post_imgs}
-                        bullets={false}
-                    />
+                <Col style={{maxWidth: 500}}>
+                    {
+                        currViewImg ?
+                            <Zoom>
+                                <img
+                                    alt="Blog post img"
+                                    src={currViewImg}
+                                    width="500"
+                                />
+                            </Zoom> : null
+                    }
+                    <Swiper
+                        spaceBetween={10}
+                        slidesPerView={3}
+                        modules={[Navigation, Pagination, Scrollbar, A11y]}
+                    >
+                        {
+                            post_imgs.map(
+                                (item, i) => (
+                                    <SwiperSlide key={i}>
+                                        <Box
+                                            sx={{
+                                                maxWidth: "100%",
+                                                width: 300,
+                                                height: "10vh",
+                                                display: "flex",
+                                                alignItems: "center"
+                                            }}
+                                        >
+                                            <Zoom>
+                                                <img
+                                                    alt="Blog post img"
+                                                    src={item.source}
+                                                    style={{maxWidth: "100%"}}
+                                                />
+                                            </Zoom>
+                                        </Box>
+                                    </SwiperSlide>
+                                )
+                            )
+                        }
+                    </Swiper>
                 </Col>
             </Row>
         )

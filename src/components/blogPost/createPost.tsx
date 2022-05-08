@@ -6,8 +6,6 @@ import {FormControl, InputLabel, MenuItem, Select, Typography} from "@mui/materi
 import {BasicButton, SuccessButton} from "../UI_Components/Buttons";
 import JoditEditor from "jodit-react";
 import {cdnUrl, globalSettings} from "../../environments/environments";
-import 'react-awesome-slider/dist/styles.css';
-import 'react-awesome-slider/dist/custom-animations/cube-animation.css';
 import {apiPostData, apiPostFile} from "../../environments/apiHandler";
 import {toggleSnackbar} from "../UI_Components/UI_Snackbar";
 import {imgShowCaseItem$, postimg, PostImgShowCase} from "./imgShowCase";
