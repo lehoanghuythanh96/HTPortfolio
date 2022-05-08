@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {Subject, takeUntil} from "rxjs";
 import {Col, Row} from "react-bootstrap";
 import { Swiper, SwiperSlide } from 'swiper/react';
-import {Scrollbar, A11y, Mousewheel} from 'swiper';
+import {Scrollbar, A11y, FreeMode, Mousewheel} from 'swiper';
 import {Box} from "@mui/material";
 import Zoom from 'react-medium-image-zoom'
 
@@ -43,11 +43,10 @@ export const PostImgShowCase = () => {
                     <Swiper
                         spaceBetween={10}
                         slidesPerView={3}
-                        modules={[Scrollbar, A11y, Mousewheel]}
+                        modules={[Scrollbar, FreeMode, Mousewheel]}
                         scrollbar={true}
-                        mousewheel={{
-                            forceToAxis: true
-                        }}
+                        freeMode={true}
+                        mousewheel={true}
                     >
                         {
                             post_imgs.map(
