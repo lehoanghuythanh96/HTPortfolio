@@ -6,37 +6,24 @@ import {Scrollbar, A11y, FreeMode, Mousewheel} from 'swiper';
 import {Box} from "@mui/material";
 import Zoom from 'react-medium-image-zoom'
 
-export const imgShowCaseItem$ = new Subject<postimg>()
-
 export interface postimg {
     source: string
     media_name: string
 }
 
-export const PostImgShowCase = () => {
+export const PostImgShowCase = (props: {
+    postImgs: postimg[]
+}) => {
 
-    const destroy$ = new Subject<boolean>()
+    let {postImgs} = props
 
-    let [post_imgs, set_post_imgs] = useState<postimg[]>([])
+    useEffect(
+        () => {
 
-    useEffect(() => {
+        }, [postImgs]
+    )
 
-        imgShowCaseItem$.pipe(
-            takeUntil(destroy$)
-        ).subscribe(
-            res => {
-                let currentImgs = [...post_imgs]
-                currentImgs.push(res)
-                set_post_imgs(currentImgs)
-            }
-        )
-        return () => {
-            destroy$.next(true)
-            destroy$.unsubscribe()
-        }
-    })
-
-    if (post_imgs.length > 0) {
+    if (postImgs.length > 0) {
         return (
             <Row className="justify-content-center py-4">
                 <Col style={{maxWidth: 500}}>
@@ -49,7 +36,7 @@ export const PostImgShowCase = () => {
                         mousewheel={true}
                     >
                         {
-                            post_imgs.map(
+                            postImgs.map(
                                 (item, i) => (
                                     <SwiperSlide key={i}>
                                         <Box

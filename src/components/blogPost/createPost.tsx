@@ -8,7 +8,7 @@ import JoditEditor from "jodit-react";
 import {cdnUrl, globalSettings} from "../../environments/environments";
 import {apiPostData, apiPostFile} from "../../environments/apiHandler";
 import {toggleSnackbar} from "../UI_Components/UI_Snackbar";
-import {imgShowCaseItem$, postimg, PostImgShowCase} from "./imgShowCase";
+import {postimg, PostImgShowCase} from "./imgShowCase";
 import {MyBreadCrumb} from "../UI_Components/UI_Breadcrumbs";
 import {gradientBgOne} from "../UI_Components/GradientBgOne";
 import {Subject, takeUntil} from "rxjs";
@@ -20,52 +20,64 @@ interface PostInfo {
     post_urlName: string
 }
 
-const postInfo$ = new Subject()
+let MyPostEditor = (props: {
+    content: string,
+    setContent: React.Dispatch<any>
+}) => {
 
-export const CreateBlogPost = () => {
+    let {content, setContent} = props
 
-    let destroy$ = new Subject<boolean>();
+    return (
+        <Row className="py-3">
+            <Col>
+                <JoditEditor
+                    value={content}
+                    config={{
+                        buttons: [
+                            'source', '|',
+                            'bold',
+                            'strikethrough',
+                            'underline',
+                            'italic', '|',
+                            'ul',
+                            'ol', '|',
+                            'outdent', 'indent', '|',
+                            'font',
+                            'fontsize',
+                            'brush',
+                            'paragraph', '|',
+                            'image',
+                            'video',
+                            'table',
+                            'link', '|',
+                            'align', 'undo', 'redo', '|',
+                            'hr',
+                            'eraser',
+                            'copyformat', '|',
+                            'symbol',
+                            'print',
+                            'about'
+                        ],
+                        readonly: false,
+                        toolbarAdaptive: false
+                    }}
+                    onBlur={newContent => {
+                        setContent((prev: PostInfo) => {
+                            return {...prev, post_content: newContent}
+                        })
+                    }}
+                />
+            </Col>
+        </Row>
+    )
+}
 
-    let [postInfo, setPostInfo] = useState<PostInfo>({
-        post_title: "",
-        post_content: "",
-        post_category: "Lifestyle",
-        post_urlName: ""
-    })
+let SubmitPost = (props: {
+    postInfo: PostInfo,
+    post_imgs: postimg[]
+}) => {
 
-    let [post_imgs, set_post_imgs] = useState<postimg[]>([])
-
-    useEffect(() => {
-        postInfo$.pipe(
-            takeUntil(destroy$)
-        ).subscribe(
-            res => {
-                let val = {...postInfo}
-                Object.assign(val, res)
-                setPostInfo(val)
-                console.log(postInfo)
-            }
-        )
-
-        imgShowCaseItem$.pipe(
-            takeUntil(destroy$)
-        ).subscribe(
-            res => {
-                let initial = [...post_imgs]
-                initial.push(res)
-                set_post_imgs(initial)
-            }
-        )
-
-        return () => {
-            destroy$.next(false);
-            destroy$.unsubscribe()
-        }
-    })
-
-
-    let addFileRef = useRef<any>()
-    let joditeditor = useRef<any>()
+    let {postInfo, post_imgs} = props
 
     let submitPost = async () => {
 
@@ -98,9 +110,24 @@ export const CreateBlogPost = () => {
         )
     }
 
+    return (
+        <BasicButton onClick={submitPost}>Submit</BasicButton>
+    )
+}
+
+let AddBlogPostImage = (props: {
+    postImgs: postimg[],
+    setPostImgs: React.Dispatch<any>
+}) => {
+
+    let {postImgs, setPostImgs} = props
+
+    let addFileRef = useRef<any>()
+
     let uploadPostimg = (e: any) => {
         const data = new FormData()
         data.append('upload', e.target.files[0])
+        data.set('imgCategory', "blogPostImage")
         let url = `blog/post/uploadimg/`;
 
         apiPostFile(url, data).then(
@@ -109,7 +136,11 @@ export const CreateBlogPost = () => {
                     return
                 }
                 let newItem = {source: `${cdnUrl}/${res.data.media_path}`, media_name: res.data.media_name}
-                imgShowCaseItem$.next(newItem)
+                setPostImgs(
+                    (prev: postimg[]) => {
+                        return [...prev, newItem]
+                    }
+                )
             }
         ).catch(
             error => {
@@ -118,51 +149,37 @@ export const CreateBlogPost = () => {
         )
     }
 
-    let PostEditor = () => {
-        return (
-            <Row className="py-3">
-                <Col>
-                    <JoditEditor
-                        ref={joditeditor}
-                        value={postInfo.post_content}
-                        config={{
-                            buttons: [
-                                'source', '|',
-                                'bold',
-                                'strikethrough',
-                                'underline',
-                                'italic', '|',
-                                'ul',
-                                'ol', '|',
-                                'outdent', 'indent', '|',
-                                'font',
-                                'fontsize',
-                                'brush',
-                                'paragraph', '|',
-                                'image',
-                                'video',
-                                'table',
-                                'link', '|',
-                                'align', 'undo', 'redo', '|',
-                                'hr',
-                                'eraser',
-                                'copyformat', '|',
-                                'symbol',
-                                'print',
-                                'about'
-                            ],
-                            readonly: false,
-                            toolbarAdaptive: false
-                        }}
-                        onBlur={newContent => {
-                            postInfo$.next({post_content: newContent})
-                        }}
-                    />
-                </Col>
-            </Row>
-        )
-    }
+    return (
+        <Row>
+            <Col>
+                <PostImgShowCase postImgs={postImgs}/>
 
+                <Row className="py-3">
+                    <Col>
+                        <input ref={addFileRef} hidden type="file" name="upload"
+                               onChange={(e) => {
+                                   uploadPostimg(e)
+                               }}/>
+                        <SuccessButton onClick={() => addFileRef.current.click()}>
+                            Add photos
+                        </SuccessButton>
+                    </Col>
+                </Row>
+            </Col>
+        </Row>
+    )
+}
+
+export const CreateBlogPost = () => {
+
+    let [postInfo, setPostInfo] = useState<PostInfo>({
+        post_title: "",
+        post_content: "",
+        post_category: "Lifestyle",
+        post_urlName: ""
+    })
+
+    let [postImgs, setPostImgs] = useState<postimg[]>([])
 
     return (
         <Container fluid style={{padding: '100px 0', background: gradientBgOne, minHeight: '100vh'}}>
@@ -184,13 +201,19 @@ export const CreateBlogPost = () => {
                                 </Typography>
                                 <Row xs={1} md={2}>
                                     <Col>
-                                        <UI_Input label="Title"
-                                                  onBlur={(e: any) => {
-                                                      let name = e.target.value
-                                                      let urlName = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                                                      urlName = urlName.replace(/[^a-zA-Z0-9]/g, '-')
-                                                      postInfo$.next({post_urlName: urlName, post_title: name})
-                                                  }}
+                                        <UI_Input
+                                            label="post title"
+                                            value={postInfo.post_title}
+                                            onChange={(e) => setPostInfo(
+                                                (prev) => {
+                                                    let name = e.target.value
+                                                    let urlName = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                                                    urlName = urlName.replace(/[^a-zA-Z0-9]/g, '-')
+                                                    let newVal = {...prev, post_title: name, post_urlName: urlName}
+                                                    return newVal
+                                                }
+                                            )}
+                                            onBlur={() => console.log(postInfo)}
                                         />
                                     </Col>
                                     <Col>
@@ -200,7 +223,7 @@ export const CreateBlogPost = () => {
                                                 label="Category"
                                                 value={postInfo.post_category}
                                                 onChange={(e: any) => {
-                                                    postInfo$.next({post_category: e.target.value})
+                                                    setPostInfo({...postInfo, post_category: e.target.value})
                                                 }}
                                             >
                                                 <MenuItem value="Lifestyle">Lifestyle</MenuItem>
@@ -219,24 +242,12 @@ export const CreateBlogPost = () => {
                                     </Col>
                                 </Row>
 
-                                {PostEditor()}
-                                <PostImgShowCase/>
-
-                                <Row className="py-3">
-                                    <Col>
-                                        <input ref={addFileRef} hidden type="file" name="upload"
-                                               onChange={(e) => {
-                                                   uploadPostimg(e)
-                                               }}/>
-                                        <SuccessButton onClick={() => addFileRef.current.click()}>
-                                            Add photos
-                                        </SuccessButton>
-                                    </Col>
-                                </Row>
+                                <MyPostEditor content={postInfo.post_content} setContent={setPostInfo}/>
+                                <AddBlogPostImage postImgs={postImgs} setPostImgs={setPostImgs}/>
 
                                 <Row className="py-3">
                                     <Col className="text-center">
-                                        <BasicButton onClick={submitPost}>Submit</BasicButton>
+                                        <SubmitPost postInfo={postInfo} post_imgs={postImgs}/>
                                     </Col>
                                 </Row>
                             </Container>
