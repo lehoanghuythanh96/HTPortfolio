@@ -2,8 +2,9 @@ import {useQuery} from "@apollo/client";
 import {graphQLqueries} from "../../store/graphQLqueries.list";
 import {useEffect, useState} from "react";
 import {Col, Container, Row} from "react-bootstrap";
-import {TableWithSelection} from "../UI_Components/Tables/TableWithSelection";
+import {TableWithSelection_Body} from "../UI_Components/Tables/TableWithSelection/TableWithSelection_Body";
 import {HeadCell} from "../../models/tableUI.interface";
+import {TableWithSelection} from "../UI_Components/Tables/TableWithSelection/TableWithSelection";
 
 export const AdminAllPostTable = () => {
 
@@ -20,6 +21,7 @@ export const AdminAllPostTable = () => {
             hidden: true,
             disablePadding: false,
             label: 'ID',
+            filter: false
         },
         {
             id: 'postTitle',
@@ -27,6 +29,7 @@ export const AdminAllPostTable = () => {
             hidden: false,
             disablePadding: false,
             label: 'Title',
+            filter: true
         },
         {
             id: 'postDate',
@@ -34,13 +37,14 @@ export const AdminAllPostTable = () => {
             hidden: false,
             disablePadding: false,
             label: 'Date',
+            filter: false
         }
     ]
 
     let [tableData, setTableData] = useState<any[]>([])
 
-    let afterDeleteRowFn = () => {
-        adminQuery.refetch()
+    let afterDeleteRowFn = async () => {
+        return await adminQuery.refetch()
     }
 
     useEffect(
@@ -70,12 +74,12 @@ export const AdminAllPostTable = () => {
     )
 
     return (
-        <Container>
+        <Container className="p-0">
             <Row>
                 <Col>
                     <TableWithSelection
                         headCells={headCells}
-                        rows = {tableData}
+                        tableData = {tableData}
                         rowMainKey={'id'}
                         deleteRowApiUrlSuffix={"blog/post/deletebyids/"}
                         afterDeleteRowFn={afterDeleteRowFn}

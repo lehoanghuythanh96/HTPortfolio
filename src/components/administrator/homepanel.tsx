@@ -18,7 +18,7 @@ export const AdminHomePage = () => {
 
     return (
         <Container style={{
-            padding: "6rem 0"
+            padding: "6rem 1rem"
         }}>
             <Row className="pb-4">
                 <Col>

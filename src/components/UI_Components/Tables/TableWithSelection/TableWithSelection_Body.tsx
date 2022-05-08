@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { alpha } from '@mui/material/styles';
+import {alpha} from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -19,9 +19,15 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import { visuallyHidden } from '@mui/utils';
-import {HeadCell} from "../../../models/tableUI.interface";
-import {apiPostData} from "../../../environments/apiHandler";
+import {visuallyHidden} from '@mui/utils';
+import {HeadCell} from "../../../../models/tableUI.interface";
+import {apiPostData} from "../../../../environments/apiHandler";
+import {UI_Input} from "../../UI_Input";
+import {Col, Row} from "react-bootstrap";
+import {FormControl, InputLabel, MenuItem, Select} from "@mui/material";
+import {BasicButton} from "../../Buttons";
+import {Subject, takeUntil} from "rxjs";
+import {useEffect} from "react";
 
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -73,7 +79,7 @@ interface EnhancedTableProps {
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
-    const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, headCells } =
+    const {onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, headCells} =
         props;
     const createSortHandler =
         (property: any) => (event: React.MouseEvent<unknown>) => {
@@ -100,7 +106,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                         align={headCell.numeric ? 'right' : 'left'}
                         padding={headCell.disablePadding ? 'none' : 'normal'}
                         sortDirection={orderBy === headCell.id ? order : false}
-                        hidden={headCell.hidden? true : false}
+                        hidden={headCell.hidden ? true : false}
                     >
                         <TableSortLabel
                             active={orderBy === headCell.id}
@@ -123,17 +129,17 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 interface EnhancedTableToolbarProps {
     numSelected: number;
-    deleteFn?: () => void
+    deleteFn?: () => any
 }
 
 const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
-    const { numSelected, deleteFn } = props;
+    const {numSelected, deleteFn} = props;
 
     return (
         <Toolbar
             sx={{
-                pl: { sm: 2 },
-                pr: { xs: 1, sm: 1 },
+                pl: {sm: 2},
+                pr: {xs: 1, sm: 1},
                 ...(numSelected > 0 && {
                     bgcolor: (theme) =>
                         alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
@@ -142,7 +148,7 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
         >
             {numSelected > 0 ? (
                 <Typography
-                    sx={{ flex: '1 1 100%' }}
+                    sx={{flex: '1 1 100%'}}
                     color="inherit"
                     variant="subtitle1"
                     component="div"
@@ -151,7 +157,7 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
                 </Typography>
             ) : (
                 <Typography
-                    sx={{ flex: '1 1 100%' }}
+                    sx={{flex: '1 1 100%'}}
                     variant="h6"
                     id="tableTitle"
                     component="div"
@@ -162,13 +168,13 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
             {numSelected > 0 ? (
                 <Tooltip title="Delete">
                     <IconButton onClick={deleteFn}>
-                        <DeleteIcon />
+                        <DeleteIcon/>
                     </IconButton>
                 </Tooltip>
             ) : (
                 <Tooltip title="Filter list">
                     <IconButton>
-                        <FilterListIcon />
+                        <FilterListIcon/>
                     </IconButton>
                 </Tooltip>
             )}
@@ -176,21 +182,24 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
     );
 };
 
-interface TableWithSelectionProps {
+interface TableWithSelectionBodyProps {
     headCells: HeadCell[],
-    rows: any[],
+    tableData: any[],
     rowMainKey: string,
     deleteRowApiUrlSuffix?: string
-    afterDeleteRowFn?: () => void
+    afterDeleteRowFn?: () => any
 }
 
-export const TableWithSelection = (props: TableWithSelectionProps) => {
+export let setSearchTerm$ = new Subject<string>()
+export let setSearchKey$ = new Subject<string>()
 
-    let {headCells, rows, rowMainKey, deleteRowApiUrlSuffix, afterDeleteRowFn} = props
+export const TableWithSelection_Body = (props: TableWithSelectionBodyProps) => {
+
+    let {headCells, tableData, rowMainKey, deleteRowApiUrlSuffix, afterDeleteRowFn} = props
 
     let deleteFn = async () => {
-        if(deleteRowApiUrlSuffix) {
-            await apiPostData(deleteRowApiUrlSuffix,selected)
+        if (deleteRowApiUrlSuffix) {
+            await apiPostData(deleteRowApiUrlSuffix, selected)
             if (afterDeleteRowFn) afterDeleteRowFn()
             return
         }
@@ -202,6 +211,42 @@ export const TableWithSelection = (props: TableWithSelectionProps) => {
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const [searchTerm, setSearchTerm] = React.useState<string>("")
+    const [rows, setRows] = React.useState<any[]>([])
+
+    let destroy$ = new Subject()
+
+    useEffect(
+        () => {
+            setRows(tableData)
+        }, [tableData]
+    )
+
+    useEffect(
+        () => {
+
+            setSearchTerm$.pipe(
+                takeUntil(destroy$)
+            ).subscribe(
+                res => {
+                    setSearchTerm(res)
+                }
+            )
+
+            setSearchKey$.pipe(
+                takeUntil(destroy$)
+            ).subscribe(
+                res => {
+                    searchFn(res)
+                }
+            )
+
+            return () => {
+                destroy$.next(true)
+                destroy$.unsubscribe()
+            }
+        }
+    )
 
     const handleRequestSort = (
         event: React.MouseEvent<unknown>,
@@ -214,7 +259,7 @@ export const TableWithSelection = (props: TableWithSelectionProps) => {
 
     const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            const newSelecteds = rows.map((n) => n.name);
+            const newSelecteds = rows.map((n) => n[rowMainKey]);
             setSelected(newSelecteds);
             return;
         }
@@ -260,13 +305,25 @@ export const TableWithSelection = (props: TableWithSelectionProps) => {
     const emptyRows =
         page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
+    let searchFn = (val: string) => {
+        let data = [...tableData]
+        try {
+            data = data.filter(item => item[searchTerm].includes(val))
+            setRows(data)
+        } catch (error) {
+            return
+        }
+    }
+
+
+
     return (
-        <Box sx={{ width: '100%' }}>
-            <Paper sx={{ width: '100%', mb: 2 }}>
-                <EnhancedTableToolbar numSelected={selected.length} deleteFn={deleteFn} />
+        <Box sx={{width: '100%'}}>
+            <Paper sx={{width: '100%', mb: 2}}>
+                <EnhancedTableToolbar numSelected={selected.length} deleteFn={deleteFn}/>
                 <TableContainer>
                     <Table
-                        sx={{ minWidth: 750 }}
+                        sx={{minWidth: 750}}
                         aria-labelledby="tableTitle"
                         size={dense ? 'small' : 'medium'}
                     >
@@ -310,7 +367,8 @@ export const TableWithSelection = (props: TableWithSelectionProps) => {
                                             </TableCell>
                                             {
                                                 headCells.map((single, i) => (
-                                                    <TableCell key={single.id} align="left" hidden={single.hidden ? true : false}>
+                                                    <TableCell key={single.id} align="left"
+                                                               hidden={single.hidden ? true : false}>
                                                         {row[single.id]}
                                                     </TableCell>
                                                 ))
@@ -324,7 +382,7 @@ export const TableWithSelection = (props: TableWithSelectionProps) => {
                                         height: (dense ? 33 : 53) * emptyRows,
                                     }}
                                 >
-                                    <TableCell colSpan={6} />
+                                    <TableCell colSpan={6}/>
                                 </TableRow>
                             )}
                         </TableBody>
@@ -341,7 +399,7 @@ export const TableWithSelection = (props: TableWithSelectionProps) => {
                 />
             </Paper>
             <FormControlLabel
-                control={<Switch checked={dense} onChange={handleChangeDense} />}
+                control={<Switch checked={dense} onChange={handleChangeDense}/>}
                 label="Dense padding"
             />
         </Box>

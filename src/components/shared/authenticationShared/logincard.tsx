@@ -66,10 +66,10 @@ export const AuthenticationLoginCard = () => {
         <LoginCard>
             <Typography variant="h3" className="text-center pb-3 fw-bold" color={globalSettings.secondaryTextColor}>Sign
                 In</Typography>
-            <UI_Input label={"Email"} onBlur={(e) => {
+            <UI_Input label={"Email"} onBlur={(e: any) => {
                 loginInfo.email = e.target.value
             }}/>
-            <UI_Input label={"Password"} onBlur={(e) => {
+            <UI_Input label={"Password"} onBlur={(e: any) => {
                 loginInfo.password = e.target.value
             }}/>
             <Row>

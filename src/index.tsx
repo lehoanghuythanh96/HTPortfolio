@@ -17,7 +17,7 @@ import {
     gql
 } from "@apollo/client";
 import {apiUrl} from "./environments/environments";
-import { Provider } from 'react-redux';
+import {Provider} from 'react-redux';
 import {reduxStore} from "./store/core.store";
 
 export const graphQLclient = new ApolloClient({

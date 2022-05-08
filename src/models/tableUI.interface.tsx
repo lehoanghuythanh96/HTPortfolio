@@ -4,4 +4,5 @@ export interface HeadCell {
     hidden: boolean,
     disablePadding: boolean,
     label: string,
+    filter: boolean
 }
