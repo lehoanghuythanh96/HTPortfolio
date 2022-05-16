@@ -17,7 +17,7 @@ class DefaultContent extends React.Component {
     }
 }
 
-export let dialogContent = new BehaviorSubject<(React.FunctionComponent) | null>(null)
+export let dialogContent = new BehaviorSubject<React.FunctionComponent | null>(null)
 export let toggleDialog = new BehaviorSubject<boolean>(false)
 
 interface myState {

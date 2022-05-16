@@ -1,18 +1,20 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useState} from "react";
 import {Col, Container, Row} from "react-bootstrap";
 import {ClayCard} from "../../UI_Components/ClayCard";
-import {UI_Input} from "../../UI_Components/UI_Input";
-import {FormControl, InputLabel, MenuItem, Select, Typography} from "@mui/material";
-import {BasicButton, SuccessButton} from "../../UI_Components/Buttons";
-import JoditEditor from "jodit-react";
-import {cdnUrl, globalSettings} from "../../../environments/environments";
-import {apiPostData, apiPostFile} from "../../../environments/apiHandler";
-import {toggleSnackbar} from "../../UI_Components/UI_Snackbar";
-import {postimg, PostImgShowCase} from "../../UI_Components/imgShowCase";
+import {Box, Typography} from "@mui/material";
+import {globalSettings} from "../../../environments/environments";
+import {postimg} from "../../UI_Components/imgShowCase";
 import {MyBreadCrumb} from "../../UI_Components/UI_Breadcrumbs";
 import {gradientBgOne} from "../../UI_Components/GradientBgOne";
-import {Subject, takeUntil} from "rxjs";
-import {AddBlogPostImage, MyPostEditor, PostCategory, PostNameOnUrl, PostTitle, SubmitPost} from "./children";
+import {
+    AddBlogPostImage,
+    AddPostAvatarBtn,
+    MyPostEditor,
+    PostCategory,
+    PostNameOnUrl,
+    PostTitle,
+    SubmitPost
+} from "./children";
 
 export interface PostInfo {
     post_title: string
@@ -31,6 +33,7 @@ export const CreateBlogPost = () => {
     })
 
     let [postImgs, setPostImgs] = useState<postimg[]>([])
+    let [postAvatar, setPostAvatar] = useState<postimg | null>(null)
 
     return (
         <Container fluid style={{padding: '100px 0', background: gradientBgOne, minHeight: '100vh'}}>
@@ -52,7 +55,7 @@ export const CreateBlogPost = () => {
                                 </Typography>
                                 <Row xs={1} md={2}>
                                     <Col>
-                                        <PostTitle postTitle={postInfo.post_title} setPostInfo={setPostInfo} />
+                                        <PostTitle setPostInfo={setPostInfo} />
                                     </Col>
                                     <Col>
                                         <PostCategory postCategory={postInfo.post_category} setPostInfo={setPostInfo} />
@@ -60,16 +63,45 @@ export const CreateBlogPost = () => {
                                 </Row>
                                 <Row>
                                     <Col>
-                                        <PostNameOnUrl postUrlName={postInfo.post_urlName} />
+                                        <PostNameOnUrl postUrlName={postInfo.post_urlName} setPostInfo={setPostInfo} />
                                     </Col>
                                     <Col xs="auto">
+                                        <AddPostAvatarBtn setPostAvatar={setPostAvatar}/>
+                                    </Col>
+                                </Row>
 
+                                <Row className="py-3 justify-content-center">
+                                    <Col xs="auto">
+                                        {
+                                            postAvatar ? (
+                                                <Box
+                                                    style={{
+                                                        width: 500,
+                                                        maxWidth: "100%",
+                                                        height: 300,
+                                                        background: `url("${postAvatar.source}") no-repeat center center / cover`
+                                                    }}
+                                                />
+                                            ) : (<div/>)
+                                        }
                                     </Col>
                                 </Row>
 
                                 <MyPostEditor content={postInfo.post_content} setContent={setPostInfo}/>
                                 <AddBlogPostImage postImgs={postImgs} setPostImgs={setPostImgs}/>
-                                <SubmitPost postInfo={postInfo} post_imgs={postImgs}/>
+                                {
+                                    postAvatar ? (
+                                        <SubmitPost post_avatar={postAvatar} postInfo={postInfo} post_imgs={postImgs}/>
+                                    ) : (
+                                        <Row>
+                                            <Col>
+                                                <Typography>
+                                                    Please add post avatar before submitting.
+                                                </Typography>
+                                            </Col>
+                                        </Row>
+                                    )
+                                }
                             </Container>
                         </ClayCard>
                     </Col>

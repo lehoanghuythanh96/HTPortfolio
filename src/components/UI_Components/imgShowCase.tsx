@@ -7,6 +7,7 @@ import {Box} from "@mui/material";
 import Zoom from 'react-medium-image-zoom'
 
 export interface postimg {
+    id: number,
     source: string
     media_name: string
 }

@@ -87,9 +87,7 @@ export const refreshToken = async () => {
         withCredentials: true
     })
 
-    return await getRefresher.post(`auth/token/refresh/`, {}, {
-        withCredentials: true
-    }).then(
+    return await getRefresher.post(`auth/token/refresh/`, {}).then(
         (res: any) => {
             if(res.data && res.data.access_token) {
                 let newToken = res.data.access_token

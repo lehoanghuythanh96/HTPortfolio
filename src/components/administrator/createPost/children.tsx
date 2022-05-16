@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Col, Row} from "react-bootstrap";
 import JoditEditor from "jodit-react";
 import {postimg, PostImgShowCase} from "../../UI_Components/imgShowCase";
@@ -8,7 +8,8 @@ import {BasicButton, SuccessButton} from "../../UI_Components/Buttons";
 import {cdnUrl} from "../../../environments/environments";
 import {PostInfo} from "./createPost";
 import {UI_Input} from "../../UI_Components/UI_Input";
-import {FormControl, InputLabel, MenuItem, Select} from "@mui/material";
+import {Box, FormControl, InputLabel, MenuItem, Select} from "@mui/material";
+import { normalizeText } from 'normalize-text';
 
 export let MyPostEditor = (props: {
     content: string,
@@ -64,21 +65,24 @@ export let MyPostEditor = (props: {
 
 export let SubmitPost = (props: {
     postInfo: PostInfo,
-    post_imgs: postimg[]
+    post_imgs: postimg[],
+    post_avatar: postimg
 }) => {
 
-    let {postInfo, post_imgs} = props
+    let {postInfo, post_imgs, post_avatar} = props
 
     let submitPost = async () => {
 
         console.log(postInfo)
         console.log(post_imgs)
+        console.log(post_avatar)
 
 
         apiPostData('blog/post/savenewpost/',
             {
                 postInfo,
-                post_imgs
+                post_imgs,
+                post_avatar
             }
         ).then(
             res => {
@@ -126,10 +130,11 @@ export let AddBlogPostImage = (props: {
 
         apiPostFile(url, data).then(
             res => {
-                if (!res.data || !res.data.media_path) {
+                if (!res.data || !res.data.media_file) {
+                    console.log("No response data or response file")
                     return
                 }
-                let newItem = {source: `${cdnUrl}/${res.data.media_path}`, media_name: res.data.media_name}
+                let newItem : postimg = {id: res.data.id, source: `${cdnUrl}${res.data.media_file}`, media_name: res.data.media_name}
                 setPostImgs(
                     (prev: postimg[]) => {
                         return [...prev, newItem]
@@ -138,6 +143,9 @@ export let AddBlogPostImage = (props: {
             }
         ).catch(
             error => {
+                if(error.data) {
+                    toggleSnackbar.next(JSON.stringify(error.data))
+                }
                 console.log(error)
             }
         )
@@ -165,22 +173,27 @@ export let AddBlogPostImage = (props: {
 }
 
 export let PostTitle = (props: {
-    postTitle: string,
     setPostInfo: React.Dispatch<any>
 }) => {
 
-    let {postTitle, setPostInfo} = props
+    let {setPostInfo} = props
+
+    let [myTitle, setMyTitle] = useState<string>("")
 
     return (
         <UI_Input
             label="Title"
-            value={postTitle}
-            onChange={(e) => setPostInfo(
+            value={myTitle}
+            onChange={(e) => setMyTitle(e.target.value)}
+            onBlur={(e) => setPostInfo(
                 (prev: PostInfo) => {
-                    let name = e.target.value
-                    let urlName = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                    let name = e.target.value.trim()
+                    let urlName = normalizeText(name)
                     urlName = urlName.replace(/[^a-zA-Z0-9]/g, '-')
-                    let newVal = {...prev, post_title: name, post_urlName: urlName}
+                    let newVal = {...prev, post_title: name}
+                    if (window.confirm("Apply url name?")) {
+                        newVal = {...prev, post_title: name, post_urlName: urlName}
+                    }
                     return newVal
                 }
             )}
@@ -217,19 +230,82 @@ export let PostCategory = (props: {
     )
 }
 
-export let AddPostAvatarBtn = () => {
+export let AddPostAvatarBtn = (props: {
+    setPostAvatar: React.Dispatch<any>
+}) => {
 
+    let {setPostAvatar} = props
+
+    let addFileRef = useRef<any>();
+
+    let uploadPostimg = (e: any) => {
+        const data = new FormData()
+        data.append('upload', e.target.files[0])
+        data.set('imgCategory', "blogPostAvatar")
+        let url = `blog/post/uploadimg/`;
+
+        apiPostFile(url, data).then(
+            res => {
+                if (!res.data || !res.data.media_file) {
+                    console.log("No response data or response file")
+                    return
+                }
+                let newItem : postimg = {id: res.data.id, source: `${cdnUrl}${res.data.media_file}`, media_name: res.data.media_name}
+                setPostAvatar(newItem)
+            }
+        ).catch(
+            error => {
+                if(error.data) {
+                    toggleSnackbar.next(JSON.stringify(error.data))
+                }
+                console.log(error)
+            }
+        )
+    }
+
+
+    return (
+        <Box>
+            <input ref={addFileRef} hidden type="file" name="upload"
+                   onChange={(e) => {
+                       uploadPostimg(e)
+                   }}/>
+            <SuccessButton onClick={() => addFileRef.current.click()}>
+                <i className="fa-regular fa-image me-2"></i> Post Avatar
+            </SuccessButton>
+        </Box>
+    )
 }
 
 export let PostNameOnUrl = (props: {
-    postUrlName: string
+    postUrlName: string,
+    setPostInfo: React.Dispatch<any>
 }) => {
-    let {postUrlName} = props
+    let {postUrlName, setPostInfo} = props
+
+    let [myUrlName, setMyUrlName] = useState<string>("")
+
+    useEffect(
+        () => {
+            setMyUrlName(postUrlName)
+        }, [postUrlName]
+    )
 
     return (
         <UI_Input label="Post name on url"
-                  value={postUrlName}
-                  disabled
+                  value={myUrlName}
+                  onChange={
+                      (e) => {
+                          setMyUrlName(e.target.value)
+                      }
+                  }
+                  onBlur={(e) => {
+                      setPostInfo(
+                          (prev: PostInfo) => {
+                              return {...prev, post_urlName: e.target.value}
+                          }
+                      )
+                  }}
         />
     )
 }
