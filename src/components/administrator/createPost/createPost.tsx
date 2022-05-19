@@ -20,7 +20,7 @@ export interface PostInfo {
     post_title: string
     post_category: string
     post_content: string
-    post_urlName: string
+    post_url_name: string
 }
 
 export const CreateBlogPost = () => {
@@ -29,7 +29,7 @@ export const CreateBlogPost = () => {
         post_title: "",
         post_content: "",
         post_category: "Lifestyle",
-        post_urlName: ""
+        post_url_name: ""
     })
 
     let [postImgs, setPostImgs] = useState<postimg[]>([])
@@ -63,7 +63,7 @@ export const CreateBlogPost = () => {
                                 </Row>
                                 <Row>
                                     <Col>
-                                        <PostNameOnUrl postUrlName={postInfo.post_urlName} setPostInfo={setPostInfo} />
+                                        <PostNameOnUrl postUrlName={postInfo.post_url_name} setPostInfo={setPostInfo} />
                                     </Col>
                                     <Col xs="auto">
                                         <AddPostAvatarBtn setPostAvatar={setPostAvatar}/>

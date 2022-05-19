@@ -73,11 +73,6 @@ export let SubmitPost = (props: {
 
     let submitPost = async () => {
 
-        console.log(postInfo)
-        console.log(post_imgs)
-        console.log(post_avatar)
-
-
         apiPostData('blog/post/savenewpost/',
             {
                 postInfo,
@@ -191,8 +186,12 @@ export let PostTitle = (props: {
                     let urlName = normalizeText(name)
                     urlName = urlName.replace(/[^a-zA-Z0-9]/g, '-')
                     let newVal = {...prev, post_title: name}
-                    if (window.confirm("Apply url name?")) {
-                        newVal = {...prev, post_title: name, post_urlName: urlName}
+                    if (
+                        urlName != "" &&
+                        prev.post_url_name != urlName &&
+                        window.confirm("Apply url name?")
+                    ) {
+                        newVal = {...prev, post_title: name, post_url_name: urlName}
                     }
                     return newVal
                 }
@@ -302,7 +301,7 @@ export let PostNameOnUrl = (props: {
                   onBlur={(e) => {
                       setPostInfo(
                           (prev: PostInfo) => {
-                              return {...prev, post_urlName: e.target.value}
+                              return {...prev, post_url_name: e.target.value}
                           }
                       )
                   }}
